@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ task.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h2>{{ task.title }}</h2>
+                    <span class="badge badge-status status-{{ task.status }} fs-6">
+                        {{ task.get_status_display }}
+                    </span>
+                </div>
+                
+                <div class="mb-3">
+                    <span class="badge bg-{{ task.priority }} me-2">
+                        <i class="bi bi-flag-fill"></i> {{ task.get_priority_display }}
+                    </span>
+                    {% if task.category %}
+                        <span class="badge bg-info me-2">
+                            <i class="bi bi-tag"></i> {{ task.category.name }}
+                        </span>
+                    {% endif %}
+                    {% if task.project %}
+                        <span class="badge bg-secondary">
+                            <i class="bi bi-folder"></i> {{ task.project.name }}
+                        </span>
+                    {% endif %}
+                </div>
+                
+                <hr>
+                
+                <h5>Description</h5>
+                <p class="text-muted">{{ task.description|default:"No description provided" }}</p>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Created by:</strong> {{ task.created_by.username }}</p>
+                        <p><strong>Created at:</strong> {{ task.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        {% if task.assigned_to %}
+                            <p><strong>Assigned to:</strong> {{ task.assigned_to.username }}</p>
+                        {% endif %}
+                        {% if task.due_date %}
+                            <p><strong>Due date:</strong> {{ task.due_date|date:"M d, Y H:i" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="mt-3">
+                    <a href="{% url 'task_update' task.pk %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <a href="{% url 'task_delete' task.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Delete
+                    </a>
+                    <a href="{% url 'task_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Comments Section -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <h4><i class="bi bi-chat-dots"></i> Comments ({{ comments.count }})</h4>
+                
+                <form method="post" class="mb-4">
+                    {% csrf_token %}
+                    {{ comment_form.content }}
+                    <button type="submit" class="btn btn-primary mt-2">
+                        <i class="bi bi-send"></i> Add Comment
+                    </button>
+                </form>
+                
+                <hr>
+                
+                {% for comment in comments %}
+                    <div class="mb-3 p-3" style="background: #f9fafb; border-radius: 10px;">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ comment.user.username }}</strong>
+                            <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                        </div>
+                        <p class="mb-0 mt-2">{{ comment.content }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No comments yet. Be the first to comment!</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-urgent { background-color: #ef4444 !important; }
+    .bg-high { background-color: #f59e0b !important; }
+    .bg-medium { background-color: #3b82f6 !important; }
+    .bg-low { background-color: #10b981 !important; }
+</style>
+{% endblock %}
